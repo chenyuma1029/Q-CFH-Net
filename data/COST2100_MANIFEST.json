@@ -1,0 +1,38 @@
+{
+  "algorithm": "sha256",
+  "description": "Expected files for the COST2100 configurations and physical evaluation.",
+  "files": {
+    "DATA_Htrainin.mat": {
+      "bytes": 1429768613,
+      "sha256": "db9d232fc347178c596653a8c0402956517353fbfa1d6d0eae8041cb3c95e2c2"
+    },
+    "DATA_Hvalin.mat": {
+      "bytes": 428919585,
+      "sha256": "aee1fc970466c198d69eca745b1fd3545b729576da728b52391a62299a3e72ed"
+    },
+    "DATA_Htestin.mat": {
+      "bytes": 285973959,
+      "sha256": "9740d1f57a03cb11b6d325aebb8f90fe175a5e7f80ef081817497931ce364c75"
+    },
+    "DATA_Htrainout.mat": {
+      "bytes": 1473870791,
+      "sha256": "9f52eaed29ea8f8b9eeae2cf843093341a3d02c216430841cb1428bbdb660909"
+    },
+    "DATA_Hvalout.mat": {
+      "bytes": 442171698,
+      "sha256": "b0f18183749dde5b79654d1f1c611b11848b2e783d213ee2152499cba432c986"
+    },
+    "DATA_Htestout.mat": {
+      "bytes": 294782702,
+      "sha256": "581d69559862cc87301ece158442f4f14b9e38f57379d1a245e396aa0ac58c98"
+    },
+    "DATA_HtestFin_all.mat": {
+      "bytes": 1234713165,
+      "sha256": "4971a6040f6086b44d9fa8e2173ac0a839a0411a44ec8a79ef843b7296d0f1da"
+    },
+    "DATA_HtestFout_all.mat": {
+      "bytes": 1233171880,
+      "sha256": "157c935b333701a429eea8430c19cd807fe9dd2cf0be7665cf3db7153d8a1012"
+    }
+  }
+}

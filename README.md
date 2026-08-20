@@ -3,6 +3,7 @@
 Official PyTorch implementation of **Q-CFH-Net: Quantization-Aware Coarse-to-Fine Hybrid Channel Seeding for CSI Feedback**, published in *IEEE Wireless Communications Letters*.
 
 [![Paper](https://img.shields.io/badge/IEEE%20Xplore-10.1109%2FLWC.2026.3724567-00629B)](https://doi.org/10.1109/LWC.2026.3724567)
+[![tests](https://github.com/chenyuma1029/Q-CFH-Net/actions/workflows/tests.yml/badge.svg)](https://github.com/chenyuma1029/Q-CFH-Net/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)](https://www.python.org/)
 
@@ -42,6 +43,8 @@ python scripts/train.py --config configs/smoke.yaml --device cpu
 
 The COST2100 data are not redistributed in this repository. Place the processed files under `data/COST2100/` as described in [data/README.md](data/README.md). The expected input is the conventional CsiNet-format angular-delay CSI representation with shape `[N, 2, 32, 32]`, or its flattened `[N, 2048]` equivalent, stored under the MATLAB key `HT`.
 
+DeepMIMO source generation and preprocessing commands are also provided in [data/README.md](data/README.md). Install the optional generator dependency with `pip install -e ".[deepmimo]"`.
+
 ## Training
 
 The paper uses `Nc = Nt = 32`, a total latent dimension of 16, a `2 x 2` coarse seed grid, and 500 epochs. The four COST2100 configurations are in `configs/cost2100/`.
@@ -80,7 +83,9 @@ python scripts/evaluate_physical.py \
   --out results/indoor_q4_seed1_physical.json
 ```
 
-Latency, parameter count, and FLOPs can be measured with:
+The physical evaluator preserves the metric definitions used to produce the released result files and also emits literal `paper_equation_*` variants. The formulas and output keys are documented in [docs/METRIC_DEFINITIONS.md](docs/METRIC_DEFINITIONS.md).
+
+Latency, parameter count, and FLOPs can be measured with the built-in fallback estimator. Install `pip install -e ".[benchmark]"` to additionally enable the fvcore estimate.
 
 ```bash
 python scripts/benchmark_latency.py \
@@ -101,7 +106,17 @@ At `eta = 1/128`, Q-CFH-Net obtains the following COST2100 results. Values are m
 | 8 | Indoor | -5.3126 +/- 0.0788 | 0.8108 +/- 0.0033 | 0.6743 +/- 0.0048 |
 | 8 | Outdoor | -5.3263 +/- 0.0390 | 0.7932 +/- 0.0015 | 0.6483 +/- 0.0023 |
 
+The `rho` and `R10` columns above use the released-result convention documented in [docs/METRIC_DEFINITIONS.md](docs/METRIC_DEFINITIONS.md).
+
 The complete comparison, per-seed values, complexity measurements, DeepMIMO results, and ablations are available in [`results/`](results/). See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for the reporting protocol.
+
+The included Q-CFH per-seed rows can be checked against the published summary without retraining:
+
+```bash
+python scripts/verify_published_results.py
+```
+
+Trained checkpoints and third-party baseline implementations are not redistributed. The repository contains the Q-CFH-Net implementation, exact public configurations, preprocessing tools, evaluation code, and the numerical evidence reported with the release.
 
 ## Citation
 

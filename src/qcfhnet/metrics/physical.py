@@ -58,11 +58,32 @@ def sparse_to_frequency(
 
 
 def physical_rho(freq_true: torch.Tensor, freq_pred: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
+    """Return the published implementation's unsquared complex correlation.
+
+    This definition is retained for exact reproduction of the released result
+    files. Use :func:`physical_rho_paper_equation` for the squared expression
+    printed in the paper.
+    """
     if freq_true.shape != freq_pred.shape:
         raise ValueError(f"freq_true and freq_pred shape mismatch: {freq_true.shape} vs {freq_pred.shape}")
     numerator = torch.abs(torch.sum(torch.conj(freq_true) * freq_pred, dim=1))
     denom_true = torch.linalg.vector_norm(freq_true, dim=1)
     denom_pred = torch.linalg.vector_norm(freq_pred, dim=1)
+    rho_per_subcarrier = numerator / (denom_true * denom_pred).clamp_min(eps)
+    return rho_per_subcarrier.mean(dim=1)
+
+
+def physical_rho_paper_equation(
+    freq_true: torch.Tensor,
+    freq_pred: torch.Tensor,
+    eps: float = 1e-12,
+) -> torch.Tensor:
+    """Return the squared complex correlation written in the paper."""
+    if freq_true.shape != freq_pred.shape:
+        raise ValueError(f"freq_true and freq_pred shape mismatch: {freq_true.shape} vs {freq_pred.shape}")
+    numerator = torch.abs(torch.sum(torch.conj(freq_true) * freq_pred, dim=1)).square()
+    denom_true = torch.sum(torch.abs(freq_true).square(), dim=1)
+    denom_pred = torch.sum(torch.abs(freq_pred).square(), dim=1)
     rho_per_subcarrier = numerator / (denom_true * denom_pred).clamp_min(eps)
     return rho_per_subcarrier.mean(dim=1)
 
@@ -107,6 +128,7 @@ def physical_rate_components(
     snr_db: float,
     eps: float = 1e-12,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Return rates and the published mean of per-subcarrier rate ratios."""
     if freq_true.shape != freq_pred.shape:
         raise ValueError(f"freq_true and freq_pred shape mismatch: {freq_true.shape} vs {freq_pred.shape}")
     rate_pred_per_subcarrier = _achievable_rate_per_subcarrier(freq_true, freq_pred, snr_db=snr_db, eps=eps)
@@ -119,6 +141,20 @@ def physical_rate_components(
     )
 
 
+def physical_rate_components_paper_equation(
+    freq_true: torch.Tensor,
+    freq_pred: torch.Tensor,
+    snr_db: float,
+    eps: float = 1e-12,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Return rates and the ratio of averaged rates written in the paper."""
+    if freq_true.shape != freq_pred.shape:
+        raise ValueError(f"freq_true and freq_pred shape mismatch: {freq_true.shape} vs {freq_pred.shape}")
+    rate_pred = physical_achievable_rate(freq_true, freq_pred, snr_db=snr_db, eps=eps)
+    rate_oracle = physical_achievable_rate(freq_true, freq_true, snr_db=snr_db, eps=eps)
+    return rate_pred, rate_oracle, rate_pred / rate_oracle.clamp_min(eps)
+
+
 def physical_rate_ratio(
     freq_true: torch.Tensor,
     freq_pred: torch.Tensor,
@@ -126,4 +162,20 @@ def physical_rate_ratio(
     eps: float = 1e-12,
 ) -> torch.Tensor:
     _, _, ratio = physical_rate_components(freq_true, freq_pred, snr_db=snr_db, eps=eps)
+    return ratio
+
+
+def physical_rate_ratio_paper_equation(
+    freq_true: torch.Tensor,
+    freq_pred: torch.Tensor,
+    snr_db: float,
+    eps: float = 1e-12,
+) -> torch.Tensor:
+    """Return the ratio of averaged rates written in the paper."""
+    _, _, ratio = physical_rate_components_paper_equation(
+        freq_true,
+        freq_pred,
+        snr_db=snr_db,
+        eps=eps,
+    )
     return ratio

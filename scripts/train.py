@@ -23,7 +23,7 @@ from qcfhnet.metrics import achievable_rate_ratio, cosine_similarity, nmse_db, n
 from qcfhnet.models import build_model
 from qcfhnet.training import build_reconstruction_loss
 from qcfhnet.utils.checkpoint import load_checkpoint, save_checkpoint
-from qcfhnet.utils.config import load_config, save_config
+from qcfhnet.utils.config import load_config, save_config, validate_config
 from qcfhnet.utils.device import get_device
 from qcfhnet.utils.hardware import save_hardware
 from qcfhnet.utils.logging import setup_logging
@@ -37,7 +37,8 @@ def load_split(config: dict, split: str, seed: int):
     name = data_cfg.get("name", "dummy").lower()
     if name == "dummy":
         num = int(data_cfg.get(f"{split}_samples", 128 if split == "train" else 32))
-        h = make_dummy_csi(num, nc=nc, nt=nt, seed=seed + (0 if split == "train" else 999))
+        split_seed_offsets = {"train": 0, "val": 999, "test": 1999}
+        h = make_dummy_csi(num, nc=nc, nt=nt, seed=seed + split_seed_offsets[split])
         return h, {"name": "dummy", "split": split, "shape": list(h.shape)}
     if name == "cost2100":
         path = data_cfg[f"{split}_path"]
@@ -193,6 +194,8 @@ def main() -> None:
         base_name = exp.get("name", Path(args.config).stem)
         exp["name"] = f"{base_name}_{args.experiment_suffix}"
         exp["output_dir"] = f"results/{exp['name']}"
+
+    validate_config(config)
 
     exp_cfg = config.get("experiment", {})
     train_cfg = config.get("train", {})
