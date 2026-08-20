@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qcfhnet"
+version = "1.0.0"
+description = "Quantization-aware coarse-to-fine hybrid channel seeding for CSI feedback"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Chenyu Ma"},
+  {name = "Xuechen Chen"},
+  {name = "Simin Dai"},
+]
+dependencies = [
+  "torch>=2.1",
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+  "pyyaml>=6.0",
+  "tqdm>=4.66",
+  "einops>=0.7",
+  "fvcore>=0.1.5",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.urls]
+Paper = "https://doi.org/10.1109/LWC.2026.3724567"
+Repository = "https://github.com/chenyuma1029/Q-CFH-Net"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

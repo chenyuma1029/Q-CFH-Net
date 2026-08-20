@@ -1,0 +1,43 @@
+experiment:
+  name: qcfh_smoke
+  seed: 1
+  output_dir: results/qcfh_smoke
+data:
+  name: dummy
+  train_samples: 16
+  val_samples: 8
+  test_samples: 8
+  nc: 8
+  nt: 8
+model:
+  name: qcfhnet
+  split_real_imag: true
+  nc: 8
+  nt: 8
+  latent_dim: 4
+  hidden_dim: 16
+  num_wire_layers: 1
+  coarse_grid: 2
+  seed_channels: 8
+  backbone: wire
+  use_hyperfilm: true
+  upsampler: interp_conv
+quantization:
+  enabled: true
+  mode: qat
+  bitwidth: 4
+  learn_scale: true
+  init_scale: 1.0
+  symmetric: true
+  input_clip: tanh
+train:
+  epochs: 1
+  batch_size: 8
+  eval_batch_size: 8
+  lr: 0.001
+  loss: mse
+  weight_decay: 0.0
+  num_workers: 0
+  val_freq: 1
+metrics:
+  snr_db: 10.0

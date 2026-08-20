@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper."
+title: "Q-CFH-Net"
+type: software
+version: 1.0.0
+date-released: 2026-08-20
+authors:
+  - family-names: Ma
+    given-names: Chenyu
+  - family-names: Chen
+    given-names: Xuechen
+  - family-names: Dai
+    given-names: Simin
+license: MIT
+repository-code: "https://github.com/chenyuma1029/Q-CFH-Net"
+preferred-citation:
+  type: article
+  title: "Q-CFH-Net: Quantization-Aware Coarse-to-Fine Hybrid Channel Seeding for CSI Feedback"
+  authors:
+    - family-names: Ma
+      given-names: Chenyu
+    - family-names: Chen
+      given-names: Xuechen
+    - family-names: Dai
+      given-names: Simin
+  journal: "IEEE Wireless Communications Letters"
+  year: 2026
+  doi: "10.1109/LWC.2026.3724567"

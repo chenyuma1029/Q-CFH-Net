@@ -1,0 +1,46 @@
+experiment:
+  name: qcfh_cost2100_indoor_q4
+  seed: 1
+  output_dir: results/qcfh_cost2100_indoor_q4
+data:
+  name: cost2100
+  scenario: indoor
+  train_path: data/COST2100/DATA_Htrainin.mat
+  val_path: data/COST2100/DATA_Hvalin.mat
+  test_path: data/COST2100/DATA_Htestin.mat
+  key: HT
+  nc: 32
+  nt: 32
+  normalization: csinet_minus_0p5
+model:
+  name: qcfhnet
+  split_real_imag: true
+  nc: 32
+  nt: 32
+  latent_dim: 8
+  hidden_dim: 256
+  num_wire_layers: 3
+  coarse_grid: 2
+  seed_channels: 32
+  backbone: wire
+  use_hyperfilm: true
+  upsampler: deconv_cascade
+quantization:
+  enabled: true
+  mode: qat
+  bitwidth: 4
+  learn_scale: true
+  init_scale: 1.0
+  symmetric: true
+  input_clip: tanh
+train:
+  epochs: 500
+  batch_size: 256
+  eval_batch_size: 256
+  lr: 0.001
+  loss: mse
+  weight_decay: 0.0
+  num_workers: 0
+  val_freq: 10
+metrics:
+  snr_db: 10.0
