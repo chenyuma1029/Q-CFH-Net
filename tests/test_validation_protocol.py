@@ -18,6 +18,19 @@ def load_module(name: str, path: Path):
     return module
 
 
+def test_dummy_train_validation_and_test_splits_are_distinct():
+    train_script = load_module("train_script_for_dummy_split_test", ROOT / "scripts" / "train.py")
+    config = {"data": {"name": "dummy", "train_samples": 4, "val_samples": 4, "test_samples": 4, "nc": 2, "nt": 2}}
+
+    h_train, _ = train_script.load_split(config, "train", seed=7)
+    h_val, _ = train_script.load_split(config, "val", seed=7)
+    h_test, _ = train_script.load_split(config, "test", seed=7)
+
+    assert not (h_train == h_val).all()
+    assert not (h_val == h_test).all()
+    assert not (h_train == h_test).all()
+
+
 def test_train_uses_val_for_selection_and_test_for_final_metrics(tmp_path):
     config = {
         "experiment": {
@@ -74,7 +87,11 @@ def test_train_uses_val_for_selection_and_test_for_final_metrics(tmp_path):
     assert results["nmse_global_db"] == results["test_nmse_global_db"]
     assert results["cosine_mean"] == results["test_cosine_mean"]
 
-    checkpoint = torch.load(ROOT / "checkpoints" / "validation_protocol_dummy" / "best.pt", map_location="cpu")
+    checkpoint = torch.load(
+        ROOT / "checkpoints" / "validation_protocol_dummy" / "best.pt",
+        map_location="cpu",
+        weights_only=True,
+    )
     assert checkpoint["selection_split"] == "val"
     assert checkpoint["selection_metric"] == "val_nmse_db_mean"
     assert "nmse_db_mean" in checkpoint["metrics"]

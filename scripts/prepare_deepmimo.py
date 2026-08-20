@@ -48,22 +48,25 @@ def load_source_npz(
     val_key: str,
     test_key: str,
 ) -> tuple[np.ndarray, np.ndarray | None, np.ndarray, dict]:
-    data = np.load(path, allow_pickle=True)
-    h_train = np.asarray(data[train_key])
-    h_val = np.asarray(data[val_key]) if val_key in data else None
-    h_test = np.asarray(data[test_key])
+    with np.load(path, allow_pickle=False) as data:
+        h_train = np.array(data[train_key], copy=True)
+        h_val = np.array(data[val_key], copy=True) if val_key in data else None
+        h_test = np.array(data[test_key], copy=True)
+        source_metadata = None
+        if "metadata" in data:
+            raw_meta = data["metadata"]
+            try:
+                source_metadata = json.loads(str(raw_meta.item()))
+            except (json.JSONDecodeError, TypeError, ValueError):
+                source_metadata = str(raw_meta)
     metadata = {
         "source_npz": str(path),
         "source_train_key": train_key,
         "source_val_key": val_key if h_val is not None else "",
         "source_test_key": test_key,
     }
-    if "metadata" in data:
-        raw_meta = data["metadata"]
-        try:
-            metadata["source_metadata"] = json.loads(str(raw_meta.item()))
-        except Exception:
-            metadata["source_metadata"] = str(raw_meta)
+    if source_metadata is not None:
+        metadata["source_metadata"] = source_metadata
     return h_train, h_val, h_test, metadata
 
 
@@ -280,11 +283,9 @@ def main() -> None:
             ],
         }
     else:
-        combined_parts = [h_train.reshape(-1), h_test.reshape(-1)]
-        if h_val is not None:
-            combined_parts.insert(1, h_val.reshape(-1))
-        combined = np.concatenate(combined_parts)
-        _, norm_meta = normalize(combined, args.normalization)
+        _, norm_meta = normalize(h_train, args.normalization)
+        if args.normalization == "per_dataset_standard":
+            norm_meta["computed_from"] = "h_train"
     if args.normalization == "per_dataset_standard":
         h_train = ((h_train - norm_meta["mean"]) / norm_meta["std"]).astype(np.float32)
         if h_val is not None:

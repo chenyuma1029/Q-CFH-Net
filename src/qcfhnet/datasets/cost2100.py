@@ -80,15 +80,21 @@ def make_dummy_csi(
 
 def load_npz(path: str | Path, split_key: str) -> tuple[np.ndarray, dict[str, Any]]:
     path = Path(path)
-    data = np.load(path, allow_pickle=True)
-    h = np.asarray(data[split_key], dtype=np.float32)
+    with np.load(path, allow_pickle=False) as data:
+        if split_key not in data:
+            available = list(data.keys())
+            raise KeyError(f"Key {split_key!r} not found in {path}. Available keys: {available}")
+        h = np.array(data[split_key], dtype=np.float32, copy=True)
+        source_metadata: Any = None
+        if "metadata" in data:
+            raw_meta = data["metadata"]
+            try:
+                source_metadata = json.loads(str(raw_meta.item()))
+            except (json.JSONDecodeError, TypeError, ValueError):
+                source_metadata = str(raw_meta)
     metadata: dict[str, Any] = {"path": str(path), "split_key": split_key, "shape": list(h.shape)}
-    if "metadata" in data:
-        raw_meta = data["metadata"]
-        try:
-            metadata["source_metadata"] = json.loads(str(raw_meta.item()))
-        except Exception:
-            metadata["source_metadata"] = str(raw_meta)
+    if source_metadata is not None:
+        metadata["source_metadata"] = source_metadata
     return h, metadata
 
 

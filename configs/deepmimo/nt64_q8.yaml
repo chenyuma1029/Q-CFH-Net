@@ -1,0 +1,46 @@
+experiment:
+  name: qcfh_deepmimo_asu_nc32_nt64_q8_seed1
+  seed: 1
+  output_dir: results/qcfh_deepmimo_asu_nc32_nt64_q8_seed1
+data:
+  name: deepmimo
+  scenario: asu_campus_3p5
+  npz_path: data/DeepMIMO/deepmimo_asu_campus_3p5_ad_nc32_nt64_seed1_full_psrms.npz
+  train_key: h_train
+  val_key: h_val
+  test_key: h_test
+  nc: 32
+  nt: 64
+model:
+  name: qcfhnet
+  split_real_imag: true
+  nc: 32
+  nt: 64
+  latent_dim: 8
+  hidden_dim: 256
+  num_wire_layers: 3
+  coarse_grid: 2
+  seed_channels: 32
+  backbone: wire
+  use_hyperfilm: true
+  upsampler: deconv_rect_cascade
+quantization:
+  enabled: true
+  mode: qat
+  bitwidth: 8
+  learn_scale: true
+  init_scale: 1.0
+  symmetric: true
+  input_clip: tanh
+train:
+  epochs: 300
+  batch_size: 256
+  eval_batch_size: 256
+  lr: 0.001
+  loss: mse
+  lambda_nmse: 0.1
+  weight_decay: 0.0
+  num_workers: 0
+  val_freq: 10
+metrics:
+  snr_db: 10.0

@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, str(SRC))
 
 from qcfhnet.models import build_model
-from qcfhnet.utils.checkpoint import load_checkpoint
+from qcfhnet.utils.checkpoint import load_checkpoint, validate_checkpoint_compatibility
 from qcfhnet.utils.complexity import (
     count_named_parameter_groups,
     detach_tree,
@@ -99,9 +99,13 @@ def main() -> None:
 
     config = load_config(args.config)
     device = get_device(args.device)
-    model = build_model(config).to(device).eval()
+    model_config = config
+    payload = None
     if args.checkpoint:
         payload = load_checkpoint(args.checkpoint, map_location=device)
+        model_config = validate_checkpoint_compatibility(config, payload)
+    model = build_model(model_config).to(device).eval()
+    if payload is not None:
         model.load_state_dict(payload["model_state"])
     nc = int(config.get("data", {}).get("nc", config.get("model", {}).get("nc", 32)))
     nt = int(config.get("data", {}).get("nt", config.get("model", {}).get("nt", 32)))
